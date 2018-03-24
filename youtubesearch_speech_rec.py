@@ -21,6 +21,7 @@ import urllib
 #import urllib2
 from bs4 import BeautifulSoup
 import youtube_dl
+import vlc
 
 
 def Google_SR(audio,r):
@@ -77,7 +78,7 @@ def Record(datapath,fs,searchID):
     return filenameFULL
 
 
-def SearchYouTube(ydl_opts,textToSearch):
+def SearchYouTube(ydl_opts,textToSearch, datapath):
     print "Searching for song..."
     query = urllib.quote(textToSearch)
     url = "https://www.youtube.com/results?search_query=" + query
@@ -90,10 +91,12 @@ def SearchYouTube(ydl_opts,textToSearch):
         song_list.append('https://www.youtube.com' + vid['href'])
     
     #ydl_opts['outtmpl'] = unicode(textToSearch + '.wav')
-    #ydl_opts['outtmpl']= u'%(textToSearch)s.%(ext)s']
+    ydl_opts['outtmpl']= datapath + '/%(title)s.%(ext)s'
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         print "Downloading song..."
-        ydl.download([song_list[0]]) # download the 1st video
+        info_dict = ydl.extract_info(song_list[0])
+        # ydl.download([song_list[0]]) # download the 1st video
+        return info_dict
 
 if __name__ == "__main__":
         
@@ -116,13 +119,23 @@ if __name__ == "__main__":
     }],
     }
     
-    datapath = r"C:\Users\chrissak\Documents\Python_Scripts\tracks"
+    datapath = os.path.dirname(os.path.realpath(__file__))
+    print datapath
     filenameFULL = Record(datapath,fs,1)
     transcription = AudioFileTranscribe(filenameFULL,r)
     print transcription
-    SearchYouTube(ydl_opts,transcription)
+    info_dict = SearchYouTube(ydl_opts,transcription, datapath)
+    video_title = info_dict.get('title', None)
+
+
+    Instance = vlc.Instance()
+    player = Instance.media_player_new()
+    Media = Instance.media_new_path(datapath + '/' + video_title + '.mp3')
+    player.set_media(Media)
+    player.play()
     
-    
+    while True:
+        pass
     
     
     #sf.write('new_file.ogg', data, samplerate)
