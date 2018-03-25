@@ -22,6 +22,11 @@ import urllib
 from bs4 import BeautifulSoup
 import youtube_dl
 import vlc
+import socket
+from shutil import copyfile
+
+
+
 
 
 def Google_SR(audio,r):
@@ -127,15 +132,20 @@ if __name__ == "__main__":
     info_dict = SearchYouTube(ydl_opts,transcription, datapath)
     video_title = info_dict.get('title', None)
 
+    copyfile(datapath + '/' + video_title + '.mp3', '/home/pavlos/Alekos_project/BeatWrite/data/' + video_title + '.mp3')
 
-    Instance = vlc.Instance()
-    player = Instance.media_player_new()
-    Media = Instance.media_new_path(datapath + '/' + video_title + '.mp3')
-    player.set_media(Media)
-    player.play()
+    clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    clientsocket.connect(('localhost', 12345))
+    clientsocket.send(video_title +'.mp3')
+
+    # Instance = vlc.Instance()
+    # player = Instance.media_player_new()
+    # Media = Instance.media_new_path(datapath + '/' + video_title + '.mp3')
+    # player.set_media(Media)
+    # player.play()
     
-    while True:
-        pass
+    # while True:
+        
     
     
     #sf.write('new_file.ogg', data, samplerate)
