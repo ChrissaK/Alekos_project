@@ -112,6 +112,8 @@ if __name__ == "__main__":
     fs = 44100
     sd.default.samplerate = fs # 44.1 kHz
     sd.default.channels = 2
+
+    beep = lambda x: os.system("echo -n '\a';sleep 0.2;" * x)
     
     # Set parameters for youtube search
     ydl_opts = {
@@ -125,18 +127,36 @@ if __name__ == "__main__":
     }
     
     datapath = os.path.dirname(os.path.realpath(__file__))
-    print datapath
-    filenameFULL = Record(datapath,fs,1)
-    transcription = AudioFileTranscribe(filenameFULL,r)
-    print transcription
-    info_dict = SearchYouTube(ydl_opts,transcription, datapath)
-    video_title = info_dict.get('title', None)
+    
+    while True:
 
-    copyfile(datapath + '/' + video_title + '.mp3', '/home/pavlos/Alekos_project/BeatWrite/data/' + video_title + '.mp3')
+        filenameFULL = Record(datapath,fs,1)
 
-    clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    clientsocket.connect(('localhost', 12345))
-    clientsocket.send(video_title +'.mp3')
+        transcription = AudioFileTranscribe(filenameFULL,r)
+
+        if transcription.lower() == "alexa":
+            print "Success"
+            print transcription
+            fileBeep = os.path.join(datapath,'beep.wav')
+            Beep, samplerate = sf.read(fileBeep)
+            #print fileBeep
+            sd.play(Beep,samplerate,blocking=True)
+            #beep(3)
+
+            filenameFULL = Record(datapath,fs,1)
+
+            transcription = AudioFileTranscribe(filenameFULL,r)
+
+            info_dict = SearchYouTube(ydl_opts,transcription, datapath)
+            video_title = info_dict.get('title', None)
+
+            copyfile(datapath + '/' + video_title + '.mp3', '/home/pavlos/Alekos_project/BeatWrite/data/temp.mp3')
+
+            clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            clientsocket.connect(('localhost', 12345))
+            clientsocket.send('temp.mp3')
+            print transcription
+  
 
     # Instance = vlc.Instance()
     # player = Instance.media_player_new()
