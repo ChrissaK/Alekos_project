@@ -81,7 +81,7 @@ def Record(datapath,fs,searchID):
     return filenameFULL
 
 
-def SearchYouTube(ydl_opts,textToSearch):
+def SearchYouTube(ydl_opts,textToSearch, datapath):
     print "Searching for song..."
     query = urllib.quote(textToSearch)
     url = "https://www.youtube.com/results?search_query=" + query
@@ -95,10 +95,12 @@ def SearchYouTube(ydl_opts,textToSearch):
     
     #ydl_opts['outtmpl'] = unicode(textToSearch + '.wav')
     #ydl_opts['outtmpl']= u'%(textToSearch)s.%(ext)s']
+    ydl_opts['outtmpl']= datapath + '/%(title)s.%(ext)s'
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         print "Downloading song..."
-        ydl.download([song_list[0]]) # download the 1st video
-
+        info_dict = ydl.extract_info(song_list[0])
+        return info_dict
+        
 if __name__ == "__main__":
         
     # Initialise sound recognition
