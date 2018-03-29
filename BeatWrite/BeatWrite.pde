@@ -62,28 +62,33 @@ void draw() {
     
       if(songLoaded) song.pause();
       
-      song = minim.loadFile(c.readString(), 2048);
-      println("Song loaded");
+      String s = c.readString();
+      println(s);
+      if(!s.equals("alexa")){
       
-      
-      song.play();
-      
-      // a beat detection object that is FREQ_ENERGY mode that 
-      // expects buffers the length of song's buffer size
-      // and samples captured at songs's sample rate
-      beat = new BeatDetect(song.bufferSize(), song.sampleRate());
-      // set the sensitivity to 300 milliseconds
-      // After a beat has been detected, the algorithm will wait for 300 milliseconds 
-      // before allowing another beat to be reported. You can use this to dampen the 
-      // algorithm if it is giving too many false-positives. The default value is 10, 
-      // which is essentially no damping. If you try to set the sensitivity to a negative value, 
-      // an error will be reported and it will be set to 10 instead. 
-      beat.setSensitivity(100);  
-      
-      // make a new beat listener, so that we won't miss any buffers for the analysis
-      bl = new BeatListener(beat, song);  
-      
-      songLoaded = true;
+        song = minim.loadFile(s, 2048);
+        println("Song loaded");
+        
+        
+        song.play();
+        
+        // a beat detection object that is FREQ_ENERGY mode that 
+        // expects buffers the length of song's buffer size
+        // and samples captured at songs's sample rate
+        beat = new BeatDetect(song.bufferSize(), song.sampleRate());
+        // set the sensitivity to 300 milliseconds
+        // After a beat has been detected, the algorithm will wait for 300 milliseconds 
+        // before allowing another beat to be reported. You can use this to dampen the 
+        // algorithm if it is giving too many false-positives. The default value is 10, 
+        // which is essentially no damping. If you try to set the sensitivity to a negative value, 
+        // an error will be reported and it will be set to 10 instead. 
+        beat.setSensitivity(100);  
+        
+        // make a new beat listener, so that we won't miss any buffers for the analysis
+        bl = new BeatListener(beat, song);  
+        
+        songLoaded = true;
+      }
   }
   
   if(songLoaded){

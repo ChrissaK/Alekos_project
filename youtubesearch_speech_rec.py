@@ -151,6 +151,10 @@ if __name__ == "__main__":
         if "alexa" in tr_words:
             print "Success"
             print transcription
+
+	    clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            clientsocket.connect(('localhost', 12345))
+            clientsocket.send('alexa')
             
             ind = np.random.choice(len(listoftracks))
             trackname = listoftracks[ind]
