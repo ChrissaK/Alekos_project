@@ -21,7 +21,14 @@ import urllib
 #import urllib2
 from bs4 import BeautifulSoup
 import youtube_dl
+<<<<<<< HEAD
 import vlc
+=======
+import socket
+from shutil import copyfile
+import numpy as np
+
+>>>>>>> f875fa0... Alexa speaking
 
 
 def Google_SR(audio,r):
@@ -78,7 +85,7 @@ def Record(datapath,fs,searchID):
     return filenameFULL
 
 
-def SearchYouTube(ydl_opts,textToSearch, datapath):
+def SearchYouTube(ydl_opts,textToSearch):
     print "Searching for song..."
     query = urllib.quote(textToSearch)
     url = "https://www.youtube.com/results?search_query=" + query
@@ -91,12 +98,10 @@ def SearchYouTube(ydl_opts,textToSearch, datapath):
         song_list.append('https://www.youtube.com' + vid['href'])
     
     #ydl_opts['outtmpl'] = unicode(textToSearch + '.wav')
-    ydl_opts['outtmpl']= datapath + '/%(title)s.%(ext)s'
+    #ydl_opts['outtmpl']= u'%(textToSearch)s.%(ext)s']
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         print "Downloading song..."
-        info_dict = ydl.extract_info(song_list[0])
-        # ydl.download([song_list[0]]) # download the 1st video
-        return info_dict
+        ydl.download([song_list[0]]) # download the 1st video
 
 if __name__ == "__main__":
         
@@ -119,23 +124,59 @@ if __name__ == "__main__":
     }],
     }
     
-    datapath = os.path.dirname(os.path.realpath(__file__))
-    print datapath
-    filenameFULL = Record(datapath,fs,1)
-    transcription = AudioFileTranscribe(filenameFULL,r)
-    print transcription
-    info_dict = SearchYouTube(ydl_opts,transcription, datapath)
-    video_title = info_dict.get('title', None)
-
-
-    Instance = vlc.Instance()
-    player = Instance.media_player_new()
-    Media = Instance.media_new_path(datapath + '/' + video_title + '.mp3')
-    player.set_media(Media)
-    player.play()
+    #headPATH, tailPATH = os.path.split(os.getcwd())
+#    datapath = r"C:\Users\chrissak\Documents\Python_Scripts\tracks"
+#    filenameFULL = Record(datapath,fs,1)
+#    transcription = AudioFileTranscribe(filenameFULL,r)
+#    print transcription
+#    SearchYouTube(ydl_opts,transcription)
+    #datapath = os.path.dirname('C:\Users\chrissak\Documents\Python_Scripts')
     
+    datapath = os.path.dirname(os.path.realpath(__file__))
+    listoftracks = os.listdir(os.path.join(datapath,'TTS'))
+    
+    for item in listoftracks:
+        a,b = item.split(".")
+        if b!='wav':
+            listoftracks.remove(item)
+            
+            
+
     while True:
-        pass
+
+        filenameFULL = Record(datapath,fs,1)
+
+        transcription = AudioFileTranscribe(filenameFULL,r)
+        transc = transcription.lower()
+        tr_words = transc.split(' ')
+
+        if "alexa" in tr_words:
+            print "Success"
+            print transcription
+            
+            ind = np.random.choice(len(listoftracks))
+            trackname = listoftracks[ind]
+            tracknameFULL = os.path.join(os.path.join(datapath,'TTS'),trackname)
+            answer, samplerate = sf.read(tracknameFULL)
+            #print fileBeep
+            sd.play(answer,samplerate,blocking=True)
+            #beep(3)
+
+            filenameFULL = Record(datapath,fs,1)
+
+            transcription = AudioFileTranscribe(filenameFULL,r)
+
+            info_dict = SearchYouTube(ydl_opts,transcription, datapath)
+            video_title = info_dict.get('title', None)
+
+            copyfile(datapath + '/' + video_title + '.mp3', '/home/pavlos/Alekos_project/BeatWrite/data/temp.mp3')
+
+            clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            clientsocket.connect(('localhost', 12345))
+            clientsocket.send('temp.mp3')
+            print transcription
+  
+    
     
     
     #sf.write('new_file.ogg', data, samplerate)
